@@ -2,33 +2,93 @@
 
 export default function Home() {
   return (
-    <main style={{
-      backgroundColor: '#0f0f0f',
-      minHeight: '100vh',
-      padding: '80px 40px',
-      color: '#eaeaea',
-      fontFamily: 'system-ui, sans-serif'
-    }}>
-      <h1 style={{ color: '#7b1e24', fontSize: 48 }}>
+    <main
+      style={{
+        backgroundColor: '#0b0b0b',
+        minHeight: '100vh',
+        padding: '120px 32px',
+        color: '#f2f2f2',
+        fontFamily:
+          "'Playfair Display', 'Georgia', serif",
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        textAlign: 'center',
+      }}
+    >
+      {/* TITLE */}
+      <h1
+        style={{
+          color: '#7b1e24',
+          fontSize: 64,
+          letterSpacing: '-1px',
+          marginBottom: 24,
+          textShadow: '0 0 20px rgba(123,30,36,0.35)',
+        }}
+      >
         Happy Birthday.
       </h1>
 
-      <p>Web ini dibuat dengan niat.</p>
+      {/* SUBTEXT */}
+      <p
+        style={{
+          fontSize: 20,
+          maxWidth: 520,
+          lineHeight: 1.6,
+          opacity: 0.9,
+        }}
+      >
+        Web ini dibuat dengan sabar.
+      </p>
 
+      {/* DIVIDER */}
+      <div
+        style={{
+          width: 80,
+          height: 2,
+          backgroundColor: '#7b1e24',
+          margin: '48px 0',
+          opacity: 0.6,
+        }}
+      />
+
+      {/* BUTTON */}
       <button
         onClick={() => alert('Iya tau kamu keren 😌')}
         style={{
-          marginTop: 40,
-          padding: '14px 26px',
-          borderRadius: 14,
-          border: 'none',
-          backgroundColor: '#7b1e24',
-          color: '#fff',
-          cursor: 'pointer'
+          padding: '16px 36px',
+          borderRadius: 999,
+          border: '1px solid #7b1e24',
+          background: 'transparent',
+          color: '#7b1e24',
+          fontSize: 16,
+          letterSpacing: 0.5,
+          cursor: 'pointer',
+          transition: 'all 0.25s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#7b1e24'
+          e.currentTarget.style.color = '#fff'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent'
+          e.currentTarget.style.color = '#7b1e24'
         }}
       >
         Klik kalo kamu ngerasa keren
       </button>
+
+      {/* FOOTER NOTE */}
+      <p
+        style={{
+          marginTop: 120,
+          fontSize: 14,
+          opacity: 0.5,
+          fontFamily: 'system-ui, sans-serif',
+        }}
+      >
+        dibuat karena adalah pokoknya:b
+      </p>
     </main>
   )
 }
