@@ -1,3 +1,5 @@
+'use client'
+
 export default function Home() {
   return (
     <main style={{
@@ -11,18 +13,10 @@ export default function Home() {
         Happy Birthday.
       </h1>
 
-      <p style={{ opacity: 0.8 }}>
-        Web ini dibuat dengan niat.
-        Dan sedikit kegabutan.
-      </p>
-
-      <p style={{ marginTop: 20 }}>
-        Katanya makin dewasa.
-        Tapi ketawanya masih receh.
-      </p>
+      <p>Web ini dibuat dengan niat.</p>
 
       <button
-        onClick={() => alert('Iya tau kamu keren. Jangan GR 😌')}
+        onClick={() => alert('Iya tau kamu keren 😌')}
         style={{
           marginTop: 40,
           padding: '14px 26px',
@@ -30,22 +24,11 @@ export default function Home() {
           border: 'none',
           backgroundColor: '#7b1e24',
           color: '#fff',
-          cursor: 'pointer',
-          fontSize: 16
+          cursor: 'pointer'
         }}
       >
         Klik kalo kamu ngerasa keren
       </button>
-
-      <div style={{ marginTop: 120, maxWidth: 600 }}>
-        <p style={{ fontSize: 14, opacity: 0.6 }}>
-          Bercanda dikit.
-        </p>
-        <p>
-          Tapi seriusnya,
-          makasih udah jadi temen yang bikin hidup ga flat.
-        </p>
-      </div>
     </main>
   )
 }
