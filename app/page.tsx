@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 
 export default function Home() {
   return (
@@ -26,7 +27,7 @@ export default function Home() {
           textShadow: '0 0 20px rgba(123,30,36,0.35)',
         }}
       >
-        Happy Birthday.
+        Another Year.
       </h1>
 
       {/* SUBTEXT */}
@@ -38,7 +39,7 @@ export default function Home() {
           opacity: 0.9,
         }}
       >
-        Web ini dibuat dengan sabar.
+        Web ini dibuat karena ya masa engga? wkwk
       </p>
 
       {/* DIVIDER */}
@@ -53,30 +54,33 @@ export default function Home() {
       />
 
       {/* BUTTON */}
-      <button
-        onClick={() => alert('Iya tau kamu keren 😌')}
-        style={{
-          padding: '16px 36px',
-          borderRadius: 999,
-          border: '1px solid #7b1e24',
-          background: 'transparent',
-          color: '#7b1e24',
-          fontSize: 16,
-          letterSpacing: 0.5,
-          cursor: 'pointer',
-          transition: 'all 0.25s ease',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#7b1e24'
-          e.currentTarget.style.color = '#fff'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent'
-          e.currentTarget.style.color = '#7b1e24'
-        }}
-      >
-        Klik kalo kamu ngerasa keren
-      </button>
+      <Link
+  href="/next"
+  style={{
+    padding: '16px 36px',
+    borderRadius: 999,
+    border: '1px solid #7b1e24',
+    background: 'transparent',
+    color: '#7b1e24',
+    fontSize: 16,
+    letterSpacing: 0.5,
+    cursor: 'pointer',
+    transition: 'all 0.25s ease',
+    textDecoration: 'none',
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.backgroundColor = '#7b1e24'
+    e.currentTarget.style.color = '#fff'
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.backgroundColor = 'transparent'
+    e.currentTarget.style.color = '#7b1e24'
+  }}
+>
+  Klik kalo kamu ngerasa keren
+</Link>
+
+
 
       {/* FOOTER NOTE */}
       <p
