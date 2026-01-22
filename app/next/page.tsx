@@ -7,7 +7,7 @@ export default function NextPage() {
       style={{
         backgroundColor: '#0b0b0b',
         minHeight: '100vh',
-        padding: '80px 32px',
+        padding: 'calc(120px - 40px) 32px',
         color: '#f2f2f2',
         fontFamily: "'Playfair Display', Georgia, serif",
         display: 'flex',
