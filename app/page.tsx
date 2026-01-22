@@ -1,7 +1,25 @@
 'use client'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import confetti from 'canvas-confetti'
+
 
 export default function Home() {
+  const router = useRouter()
+
+const handleClick = () => {
+  confetti({
+    particleCount: 120,
+    spread: 70,
+    origin: { y: 0.6 },
+    colors: ['#7b1e24', '#5a1419'],
+  })
+
+  setTimeout(() => {
+    router.push('/next')
+  }, 700) // delay biar efeknya KE RASA
+}
+
   return (
     <main
       style={{
@@ -54,31 +72,31 @@ export default function Home() {
       />
 
       {/* BUTTON */}
-      <Link
-  href="/next"
-  style={{
-    padding: '16px 36px',
-    borderRadius: 999,
-    border: '1px solid #7b1e24',
-    background: 'transparent',
-    color: '#7b1e24',
-    fontSize: 16,
-    letterSpacing: 0.5,
-    cursor: 'pointer',
-    transition: 'all 0.25s ease',
-    textDecoration: 'none',
-  }}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.backgroundColor = '#7b1e24'
-    e.currentTarget.style.color = '#fff'
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.backgroundColor = 'transparent'
-    e.currentTarget.style.color = '#7b1e24'
-  }}
->
-  Klik kalo kamu ngerasa keren
-</Link>
+        <Link
+    href="/next"
+    style={{
+      padding: '16px 36px',
+      borderRadius: 999,
+      border: '1px solid #7b1e24',
+      background: 'transparent',
+      color: '#7b1e24',
+      fontSize: 16,
+      letterSpacing: 0.5,
+      cursor: 'pointer',
+      transition: 'all 0.25s ease',
+      textDecoration: 'none',
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.backgroundColor = '#7b1e24'
+      e.currentTarget.style.color = '#fff'
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.backgroundColor = 'transparent'
+      e.currentTarget.style.color = '#7b1e24'
+    }}
+  >
+    Klik kalo kamu ngerasa keren
+  </Link>
 
 
 
