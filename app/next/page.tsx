@@ -9,6 +9,8 @@ export default function ScratchPage() {
   const [progress, setProgress] = useState(0)
   const [done, setDone] = useState(false)
 
+  let imgCache: HTMLImageElement | null = null
+
   useEffect(() => {
     const imgCanvas = imgCanvasRef.current!
     const maskCanvas = maskCanvasRef.current!
@@ -20,6 +22,8 @@ export default function ScratchPage() {
     img.src = '/img/photo.jpg'
 
     img.onload = () => {
+      imgCache = img
+
       const w = img.width
       const h = img.height
 
@@ -28,15 +32,15 @@ export default function ScratchPage() {
       maskCanvas.width = w
       maskCanvas.height = h
 
-      // 🔥 GAMBAR HITAM PUTIH (BASE)
+      // BASE HITAM PUTIH (BELUM KELIATAN)
       imgCtx.filter = 'grayscale(100%)'
       imgCtx.drawImage(img, 0, 0, w, h)
       imgCtx.filter = 'none'
 
-      // 🔥 OVERLAY WARNA (YANG DIGOSOK)
+      // OVERLAY WARNA (INI YANG DIGOSOK)
       maskCtx.drawImage(img, 0, 0, w, h)
 
-      // 🔥 TUTUPIN PAKE ARSIR
+      // ARSIR
       maskCtx.globalCompositeOperation = 'source-over'
       maskCtx.fillStyle = '#0b0b0b'
       maskCtx.fillRect(0, 0, w, h)
@@ -72,7 +76,14 @@ export default function ScratchPage() {
 
     setProgress(percent)
 
-    if (percent >= 100) {
+    // 🔥 INI KUNCI TAMBAHANNYA
+    if (percent >= 100 && imgCache) {
+      const imgCtx = imgCanvasRef.current!.getContext('2d')!
+      imgCtx.clearRect(0, 0, imgCanvasRef.current!.width, imgCanvasRef.current!.height)
+      imgCtx.filter = 'grayscale(100%)'
+      imgCtx.drawImage(imgCache, 0, 0)
+      imgCtx.filter = 'none'
+
       setDone(true)
       ctx.clearRect(0, 0, canvas.width, canvas.height)
     }
@@ -140,6 +151,24 @@ export default function ScratchPage() {
             }}
           >
             {progress}%
+          </div>
+        )}
+
+        {/* 🔥 CARD SETELAH SELESAI */}
+        {done && (
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 16,
+              left: 16,
+              right: 16,
+              background: '#fff',
+              borderRadius: 16,
+              padding: 16,
+            }}
+          >
+            <b>Untuk kamu</b>
+            <p>isi ucapan bebas dari kamu</p>
           </div>
         )}
       </div>
