@@ -10,6 +10,7 @@ export default function ScratchPage() {
 
   const [progress, setProgress] = useState(0)
   const [done, setDone] = useState(false)
+  const [size, setSize] = useState<{ w: number; h: number } | null>(null)
 
   useEffect(() => {
     if (!colorRef.current || !coverRef.current || !bwRef.current) return
@@ -18,29 +19,29 @@ export default function ScratchPage() {
     const cover = coverRef.current
     const bw = bwRef.current
 
-    const cCtx = color.getContext('2d')
-    const coverCtx = cover.getContext('2d')
-    const bwCtx = bw.getContext('2d')
+    const cCtx = color.getContext('2d')!
+    const coverCtx = cover.getContext('2d')!
+    const bwCtx = bw.getContext('2d')!
 
-    if (!cCtx || !coverCtx || !bwCtx) return
-
-    const img = new window.Image()
+    const img = new Image()
     img.src = '/img/photo.jpg'
 
     img.onload = () => {
       const w = img.width
       const h = img.height
 
+      setSize({ w, h })
+
       ;[color, cover, bw].forEach(c => {
         c.width = w
         c.height = h
       })
 
-      // 🔥 GAMBAR WARNA (DISIAPKAN, TAPI TERTUTUP COVER)
+      // GAMBAR WARNA (DI BAWAH)
       cCtx.clearRect(0, 0, w, h)
       cCtx.drawImage(img, 0, 0, w, h)
 
-      // 🔥 COVER / BATU
+      // COVER / BATU
       coverCtx.globalCompositeOperation = 'source-over'
       coverCtx.fillStyle = '#0b0b0b'
       coverCtx.fillRect(0, 0, w, h)
@@ -51,7 +52,7 @@ export default function ScratchPage() {
       coverCtx.textBaseline = 'middle'
       coverCtx.fillText('Gosok sampai habis', w / 2, h / 2)
 
-      // BW KOSONG
+      // BW kosong dulu
       bwCtx.clearRect(0, 0, w, h)
     }
   }, [])
@@ -79,18 +80,14 @@ export default function ScratchPage() {
     )
 
     setProgress(percent)
-
     if (percent >= 100) finish()
   }
 
   const finish = () => {
-    if (!colorRef.current || !bwRef.current) return
-
-    const bwCtx = bwRef.current.getContext('2d')!
+    const bwCtx = bwRef.current!.getContext('2d')!
     bwCtx.filter = 'grayscale(100%)'
-    bwCtx.drawImage(colorRef.current, 0, 0)
+    bwCtx.drawImage(colorRef.current!, 0, 0)
     bwCtx.filter = 'none'
-
     setDone(true)
   }
 
@@ -119,83 +116,72 @@ export default function ScratchPage() {
         alignItems: 'center',
       }}
     >
-      <div style={{ position: 'relative' }}>
-  {/* GAMBAR WARNA (DI BAWAH, KEKETUTUP COVER) */}
-  <canvas
-    ref={colorRef}
-    style={{
-      position: 'absolute',
-      inset: 0,
-      zIndex: 1,
-    }}
-  />
+      {size && (
+        <div
+          style={{
+            position: 'relative',
+            width: size.w,
+            height: size.h,
+          }}
+        >
+          <canvas ref={colorRef} style={{ position: 'absolute', inset: 0 }} />
 
-  {/* GAMBAR BW (TIMPA SETELAH DONE) */}
-  {done && (
-    <canvas
-      ref={bwRef}
-      style={{
-        position: 'absolute',
-        inset: 0,
-        zIndex: 3,
-      }}
-    />
-  )}
+          {done && (
+            <canvas
+              ref={bwRef}
+              style={{ position: 'absolute', inset: 0 }}
+            />
+          )}
 
-  {/* COVER / BATU (PALING ATAS SAAT GOSOK) */}
-  {!done && (
-    <canvas
-      ref={coverRef}
-      onMouseDown={() => (isDrawing.current = true)}
-      onMouseUp={() => (isDrawing.current = false)}
-      onMouseLeave={() => (isDrawing.current = false)}
-      onMouseMove={draw}
-      onTouchStart={() => (isDrawing.current = true)}
-      onTouchEnd={() => (isDrawing.current = false)}
-      onTouchMove={draw}
-      style={{
-        position: 'absolute',
-        inset: 0,
-        zIndex: 2,
-        touchAction: 'none',
-      }}
-    />
-  )}
+          {!done && (
+            <canvas
+              ref={coverRef}
+              onMouseDown={() => (isDrawing.current = true)}
+              onMouseUp={() => (isDrawing.current = false)}
+              onMouseMove={draw}
+              onTouchStart={() => (isDrawing.current = true)}
+              onTouchEnd={() => (isDrawing.current = false)}
+              onTouchMove={draw}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                touchAction: 'none',
+              }}
+            />
+          )}
 
-  {/* CARD */}
-  {done && (
-    <div
-      style={{
-        position: 'absolute',
-        bottom: 12,
-        left: 12,
-        right: 12,
-        background: '#fff',
-        padding: 16,
-        borderRadius: 12,
-        zIndex: 4,
-      }}
-    >
-      <b>Pesan dari aku</b>
-      <p>Isi ucapan bebas</p>
-    </div>
-  )}
+          {!done && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 12,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                color: '#fff',
+              }}
+            >
+              {progress}%
+            </div>
+          )}
 
-  {!done && (
-    <div
-      style={{
-        position: 'absolute',
-        top: 12,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        color: '#fff',
-        zIndex: 5,
-      }}
-    >
-      {progress}%
-    </div>
-  )}
-</div>
+          {done && (
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 12,
+                left: 12,
+                right: 12,
+                background: '#fff',
+                padding: 16,
+                borderRadius: 12,
+              }}
+            >
+              <b>Pesan dari aku</b>
+              <p>Isi ucapan bebas</p>
+            </div>
+          )}
+        </div>
+      )}
     </main>
   )
 }
