@@ -159,7 +159,7 @@ export default function ScratchPage() {
   <div
     style={{
       position: 'absolute',
-      bottom: -90, // 🔥 INI KUNCINYA
+      bottom: -85, // 🔥 INI KUNCINYA
       left: 12,
       right: 12,
       background: '#fff',
