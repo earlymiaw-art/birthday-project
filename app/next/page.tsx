@@ -9,7 +9,7 @@ export default function ScratchPage() {
   const [progress, setProgress] = useState(0)
   const [done, setDone] = useState(false)
 
-  let imgCache: HTMLImageElement | null = null
+  const imgCache = useRef<HTMLImageElement | null>(null)
 
   useEffect(() => {
     const imgCanvas = imgCanvasRef.current!
@@ -22,7 +22,7 @@ export default function ScratchPage() {
     img.src = '/img/photo.jpg'
 
     img.onload = () => {
-      imgCache = img
+      imgCache.current = img
 
       const w = img.width
       const h = img.height
@@ -32,17 +32,11 @@ export default function ScratchPage() {
       maskCanvas.width = w
       maskCanvas.height = h
 
-      // BASE HITAM PUTIH (BELUM KELIATAN)
-      imgCtx.filter = 'grayscale(100%)'
+      // 🔥 GAMBAR ASLI (BERWARNA, TAPI KETUTUP)
       imgCtx.drawImage(img, 0, 0, w, h)
-      imgCtx.filter = 'none'
 
-      // OVERLAY WARNA (INI YANG DIGOSOK)
-      maskCtx.drawImage(img, 0, 0, w, h)
-
-      // ARSIR
-      maskCtx.globalCompositeOperation = 'source-over'
-      maskCtx.fillStyle = '#0b0b0b'
+      // 🔥 TUTUP FULL
+      maskCtx.fillStyle = '#111'
       maskCtx.fillRect(0, 0, w, h)
 
       maskCtx.fillStyle = '#7b1e24'
@@ -76,17 +70,21 @@ export default function ScratchPage() {
 
     setProgress(percent)
 
-    // 🔥 INI KUNCI TAMBAHANNYA
-    if (percent >= 100 && imgCache) {
-      const imgCtx = imgCanvasRef.current!.getContext('2d')!
-      imgCtx.clearRect(0, 0, imgCanvasRef.current!.width, imgCanvasRef.current!.height)
-      imgCtx.filter = 'grayscale(100%)'
-      imgCtx.drawImage(imgCache, 0, 0)
-      imgCtx.filter = 'none'
-
-      setDone(true)
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+    if (percent >= 100 && !done) {
+      finish()
     }
+  }
+
+  const finish = () => {
+    const imgCtx = imgCanvasRef.current!.getContext('2d')!
+    const img = imgCache.current!
+
+    imgCtx.clearRect(0, 0, imgCanvasRef.current!.width, imgCanvasRef.current!.height)
+    imgCtx.filter = 'grayscale(100%)'
+    imgCtx.drawImage(img, 0, 0)
+    imgCtx.filter = 'none'
+
+    setDone(true)
   }
 
   const draw = (e: any) => {
@@ -98,7 +96,7 @@ export default function ScratchPage() {
 
     ctx.globalCompositeOperation = 'destination-out'
     ctx.beginPath()
-    ctx.arc(x, y, 35, 0, Math.PI * 2)
+    ctx.arc(x, y, 32, 0, Math.PI * 2)
     ctx.fill()
 
     calculateProgress()
@@ -154,14 +152,13 @@ export default function ScratchPage() {
           </div>
         )}
 
-        {/* 🔥 CARD SETELAH SELESAI */}
         {done && (
           <div
             style={{
               position: 'absolute',
               bottom: 16,
               left: 16,
-              right: 16,
+              width: '70%',
               background: '#fff',
               borderRadius: 16,
               padding: 16,
