@@ -1,60 +1,123 @@
 'use client'
-import Link from 'next/link'
+import { useEffect, useRef } from 'react'
 
-export default function NextPage() {
+export default function ScratchPage() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const isDrawing = useRef(false)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const img = new Image()
+    img.src = 'https://i.pinimg.com/736x/c1/c9/3e/c1c93e40ec65041519433d7e79bc4a71.jpg'
+
+    img.onload = () => {
+      const maxWidth = window.innerWidth * 0.9
+      const scale = img.width > maxWidth ? maxWidth / img.width : 1
+
+      canvas.width = img.width * scale
+      canvas.height = img.height * scale
+
+      // gambar asli
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+      // overlay arsir
+      ctx.globalCompositeOperation = 'source-over'
+      ctx.fillStyle = '#0b0b0b'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      ctx.font = '24px serif'
+      ctx.fillStyle = '#7b1e24'
+      ctx.textAlign = 'center'
+      ctx.fillText(
+        'Gosok biar keliatan',
+        canvas.width / 2,
+        canvas.height / 2
+      )
+
+      // mode hapus
+      ctx.globalCompositeOperation = 'destination-out'
+    }
+  }, [])
+
+  const getPos = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) => {
+    const canvas = canvasRef.current
+    if (!canvas) return { x: 0, y: 0 }
+
+    const rect = canvas.getBoundingClientRect()
+
+    if ('touches' in e) {
+      return {
+        x: e.touches[0].clientX - rect.left,
+        y: e.touches[0].clientY - rect.top,
+      }
+    }
+
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    }
+  }
+
+  const startDraw = () => {
+    isDrawing.current = true
+  }
+
+  const endDraw = () => {
+    isDrawing.current = false
+  }
+
+  const draw = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) => {
+    if (!isDrawing.current) return
+    e.preventDefault()
+
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const { x, y } = getPos(e)
+
+    ctx.beginPath()
+    ctx.arc(x, y, 28, 0, Math.PI * 2)
+    ctx.fill()
+  }
+
   return (
     <main
       style={{
-        backgroundColor: '#0b0b0b',
         minHeight: '100vh',
-        padding: 'calc(120px - 40px) 32px',
-        color: '#f2f2f2',
-        fontFamily: "'Playfair Display', Georgia, serif",
+        backgroundColor: '#000',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        textAlign: 'center',
       }}
     >
-      <h1
+      <canvas
+        ref={canvasRef}
+        onMouseDown={startDraw}
+        onMouseUp={endDraw}
+        onMouseLeave={endDraw}
+        onMouseMove={draw}
+        onTouchStart={startDraw}
+        onTouchEnd={endDraw}
+        onTouchMove={draw}
         style={{
-          color: '#7b1e24',
-          fontSize: 56,
-          marginBottom: 24,
-          textShadow: '0 0 20px rgba(123,30,36,0.35)',
+          maxWidth: '90%',
+          borderRadius: 16,
+          touchAction: 'none',
+          cursor: 'pointer',
         }}
-      >
-        Ya jelas.
-      </h1>
-
-      <p
-        style={{
-          fontSize: 20,
-          maxWidth: 520,
-          lineHeight: 1.6,
-          opacity: 0.9,
-        }}
-      >
-        Kalo kamu ga ngerasa keren,  
-        kamu ga akan ngeklik tombol itu.
-      </p>
-
-      <Link href="/">
-        <button
-          style={{
-            marginTop: 48,
-            padding: '14px 32px',
-            borderRadius: 999,
-            border: '1px solid #7b1e24',
-            background: 'transparent',
-            color: '#7b1e24',
-            cursor: 'pointer',
-          }}
-        >
-          Balik lagi
-        </button>
-      </Link>
+      />
     </main>
   )
 }
