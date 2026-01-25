@@ -2,26 +2,19 @@
 import { useEffect, useRef, useState } from 'react'
 
 export default function ScratchPage() {
-  const colorRef = useRef<HTMLCanvasElement>(null)
-  const coverRef = useRef<HTMLCanvasElement>(null)
-  const bwRef = useRef<HTMLCanvasElement>(null)
-
+  const imgCanvasRef = useRef<HTMLCanvasElement>(null)
+  const maskCanvasRef = useRef<HTMLCanvasElement>(null)
   const isDrawing = useRef(false)
 
   const [progress, setProgress] = useState(0)
   const [done, setDone] = useState(false)
-  const [size, setSize] = useState<{ w: number; h: number } | null>(null)
 
   useEffect(() => {
-    if (!colorRef.current || !coverRef.current || !bwRef.current) return
+    const imgCanvas = imgCanvasRef.current!
+    const maskCanvas = maskCanvasRef.current!
 
-    const color = colorRef.current
-    const cover = coverRef.current
-    const bw = bwRef.current
-
-    const cCtx = color.getContext('2d')!
-    const coverCtx = cover.getContext('2d')!
-    const bwCtx = bw.getContext('2d')!
+    const imgCtx = imgCanvas.getContext('2d')!
+    const maskCtx = maskCanvas.getContext('2d')!
 
     const img = new Image()
     img.src = '/img/photo.jpg'
@@ -30,72 +23,66 @@ export default function ScratchPage() {
       const w = img.width
       const h = img.height
 
-      setSize({ w, h })
+      imgCanvas.width = w
+      imgCanvas.height = h
+      maskCanvas.width = w
+      maskCanvas.height = h
 
-      ;[color, cover, bw].forEach(c => {
-        c.width = w
-        c.height = h
-      })
+      // 🔥 GAMBAR HITAM PUTIH (BASE)
+      imgCtx.filter = 'grayscale(100%)'
+      imgCtx.drawImage(img, 0, 0, w, h)
+      imgCtx.filter = 'none'
 
-      // GAMBAR WARNA (DI BAWAH)
-      cCtx.clearRect(0, 0, w, h)
-      cCtx.drawImage(img, 0, 0, w, h)
+      // 🔥 OVERLAY WARNA (YANG DIGOSOK)
+      maskCtx.drawImage(img, 0, 0, w, h)
 
-      // COVER / BATU
-      coverCtx.globalCompositeOperation = 'source-over'
-      coverCtx.fillStyle = '#0b0b0b'
-      coverCtx.fillRect(0, 0, w, h)
+      // 🔥 TUTUPIN PAKE ARSIR
+      maskCtx.globalCompositeOperation = 'source-over'
+      maskCtx.fillStyle = '#0b0b0b'
+      maskCtx.fillRect(0, 0, w, h)
 
-      coverCtx.fillStyle = '#7b1e24'
-      coverCtx.font = '24px serif'
-      coverCtx.textAlign = 'center'
-      coverCtx.textBaseline = 'middle'
-      coverCtx.fillText('Gosok sampai habis', w / 2, h / 2)
-
-      // BW kosong dulu
-      bwCtx.clearRect(0, 0, w, h)
+      maskCtx.fillStyle = '#7b1e24'
+      maskCtx.font = '24px serif'
+      maskCtx.textAlign = 'center'
+      maskCtx.fillText('Gosok sampai 100%', w / 2, h / 2)
     }
   }, [])
 
   const getPos = (e: any) => {
-    const rect = coverRef.current!.getBoundingClientRect()
+    const rect = maskCanvasRef.current!.getBoundingClientRect()
     const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left
     const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top
     return { x, y }
   }
 
-  const calcProgress = () => {
-    const canvas = coverRef.current!
+  const calculateProgress = () => {
+    const canvas = maskCanvasRef.current!
     const ctx = canvas.getContext('2d')!
-    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data
 
-    let cleared = 0
-    for (let i = 3; i < data.length; i += 4) {
-      if (data[i] === 0) cleared++
+    let transparent = 0
+    for (let i = 3; i < imageData.length; i += 4) {
+      if (imageData[i] === 0) transparent++
     }
 
     const percent = Math.min(
       100,
-      Math.round((cleared / (data.length / 4)) * 100)
+      Math.round((transparent / (imageData.length / 4)) * 100)
     )
 
     setProgress(percent)
-    if (percent >= 100) finish()
-  }
 
-  const finish = () => {
-    const bwCtx = bwRef.current!.getContext('2d')!
-    bwCtx.filter = 'grayscale(100%)'
-    bwCtx.drawImage(colorRef.current!, 0, 0)
-    bwCtx.filter = 'none'
-    setDone(true)
+    if (percent >= 100) {
+      setDone(true)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+    }
   }
 
   const draw = (e: any) => {
     if (!isDrawing.current || done) return
     e.preventDefault()
 
-    const ctx = coverRef.current!.getContext('2d')!
+    const ctx = maskCanvasRef.current!.getContext('2d')!
     const { x, y } = getPos(e)
 
     ctx.globalCompositeOperation = 'destination-out'
@@ -103,7 +90,7 @@ export default function ScratchPage() {
     ctx.arc(x, y, 35, 0, Math.PI * 2)
     ctx.fill()
 
-    calcProgress()
+    calculateProgress()
   }
 
   return (
@@ -116,72 +103,46 @@ export default function ScratchPage() {
         alignItems: 'center',
       }}
     >
-      {size && (
-        <div
-          style={{
-            position: 'relative',
-            width: size.w,
-            height: size.h,
-          }}
-        >
-          <canvas ref={colorRef} style={{ position: 'absolute', inset: 0 }} />
+      <div style={{ position: 'relative' }}>
+        <canvas ref={imgCanvasRef} style={{ borderRadius: 16 }} />
 
-          {done && (
-            <canvas
-              ref={bwRef}
-              style={{ position: 'absolute', inset: 0 }}
-            />
-          )}
+        {!done && (
+          <canvas
+            ref={maskCanvasRef}
+            onMouseDown={() => (isDrawing.current = true)}
+            onMouseUp={() => (isDrawing.current = false)}
+            onMouseLeave={() => (isDrawing.current = false)}
+            onMouseMove={draw}
+            onTouchStart={() => (isDrawing.current = true)}
+            onTouchEnd={() => (isDrawing.current = false)}
+            onTouchMove={draw}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: 16,
+              touchAction: 'none',
+            }}
+          />
+        )}
 
-          {!done && (
-            <canvas
-              ref={coverRef}
-              onMouseDown={() => (isDrawing.current = true)}
-              onMouseUp={() => (isDrawing.current = false)}
-              onMouseMove={draw}
-              onTouchStart={() => (isDrawing.current = true)}
-              onTouchEnd={() => (isDrawing.current = false)}
-              onTouchMove={draw}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                touchAction: 'none',
-              }}
-            />
-          )}
-
-          {!done && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 12,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                color: '#fff',
-              }}
-            >
-              {progress}%
-            </div>
-          )}
-
-          {done && (
-            <div
-              style={{
-                position: 'absolute',
-                bottom: 12,
-                left: 12,
-                right: 12,
-                background: '#fff',
-                padding: 16,
-                borderRadius: 12,
-              }}
-            >
-              <b>Pesan dari aku</b>
-              <p>Isi ucapan bebas</p>
-            </div>
-          )}
-        </div>
-      )}
+        {!done && (
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 12,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'rgba(0,0,0,0.6)',
+              color: '#fff',
+              padding: '6px 14px',
+              borderRadius: 999,
+              fontSize: 14,
+            }}
+          >
+            {progress}%
+          </div>
+        )}
+      </div>
     </main>
   )
 }
