@@ -2,76 +2,92 @@
 import { useEffect, useRef, useState } from 'react'
 
 export default function ScratchPage() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const imgCanvasRef = useRef<HTMLCanvasElement>(null)
+  const maskCanvasRef = useRef<HTMLCanvasElement>(null)
   const isDrawing = useRef(false)
+
   const [progress, setProgress] = useState(0)
   const [done, setDone] = useState(false)
 
   useEffect(() => {
-    const canvas = canvasRef.current!
-    const ctx = canvas.getContext('2d')!
+    const imgCanvas = imgCanvasRef.current!
+    const maskCanvas = maskCanvasRef.current!
+
+    const imgCtx = imgCanvas.getContext('2d')!
+    const maskCtx = maskCanvas.getContext('2d')!
 
     const img = new Image()
     img.src = '/img/photo.jpg'
 
     img.onload = () => {
-      const maxWidth = window.innerWidth * 0.9
-      const scale = img.width > maxWidth ? maxWidth / img.width : 1
+      const w = img.width
+      const h = img.height
 
-      canvas.width = img.width * scale
-      canvas.height = img.height * scale
+      imgCanvas.width = w
+      imgCanvas.height = h
+      maskCanvas.width = w
+      maskCanvas.height = h
 
-      /** 1️⃣ gambar HITAM PUTIH (background) */
-      ctx.filter = 'grayscale(100%)'
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      // 🔥 GAMBAR HITAM PUTIH (BASE)
+      imgCtx.filter = 'grayscale(100%)'
+      imgCtx.drawImage(img, 0, 0, w, h)
+      imgCtx.filter = 'none'
 
-      /** 2️⃣ gambar WARNA (layer atas) */
-      ctx.filter = 'none'
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      // 🔥 OVERLAY WARNA (YANG DIGOSOK)
+      maskCtx.drawImage(img, 0, 0, w, h)
 
-      /** 3️⃣ siap dihapus */
-      ctx.globalCompositeOperation = 'destination-out'
+      // 🔥 TUTUPIN PAKE ARSIR
+      maskCtx.globalCompositeOperation = 'source-over'
+      maskCtx.fillStyle = '#0b0b0b'
+      maskCtx.fillRect(0, 0, w, h)
+
+      maskCtx.fillStyle = '#7b1e24'
+      maskCtx.font = '24px serif'
+      maskCtx.textAlign = 'center'
+      maskCtx.fillText('Gosok sampai 100%', w / 2, h / 2)
     }
   }, [])
 
   const getPos = (e: any) => {
-    const rect = canvasRef.current!.getBoundingClientRect()
-    const touch = e.touches?.[0]
-    return {
-      x: (touch ? touch.clientX : e.clientX) - rect.left,
-      y: (touch ? touch.clientY : e.clientY) - rect.top,
-    }
+    const rect = maskCanvasRef.current!.getBoundingClientRect()
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top
+    return { x, y }
   }
 
-  const startDraw = () => (isDrawing.current = true)
-  const endDraw = () => (isDrawing.current = false)
-
   const calculateProgress = () => {
-    const canvas = canvasRef.current!
+    const canvas = maskCanvasRef.current!
     const ctx = canvas.getContext('2d')!
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    const pixels = imageData.data
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data
 
     let transparent = 0
-    for (let i = 3; i < pixels.length; i += 4) {
-      if (pixels[i] === 0) transparent++
+    for (let i = 3; i < imageData.length; i += 4) {
+      if (imageData[i] === 0) transparent++
     }
 
-    const percent = Math.round((transparent / (pixels.length / 4)) * 100)
+    const percent = Math.min(
+      100,
+      Math.round((transparent / (imageData.length / 4)) * 100)
+    )
+
     setProgress(percent)
 
-    if (percent >= 100) setDone(true)
+    if (percent >= 100) {
+      setDone(true)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+    }
   }
 
   const draw = (e: any) => {
     if (!isDrawing.current || done) return
     e.preventDefault()
 
-    const ctx = canvasRef.current!.getContext('2d')!
+    const ctx = maskCanvasRef.current!.getContext('2d')!
     const { x, y } = getPos(e)
 
+    ctx.globalCompositeOperation = 'destination-out'
     ctx.beginPath()
-    ctx.arc(x, y, 40, 0, Math.PI * 2)
+    ctx.arc(x, y, 35, 0, Math.PI * 2)
     ctx.fill()
 
     calculateProgress()
@@ -83,31 +99,50 @@ export default function ScratchPage() {
         minHeight: '100vh',
         background: '#000',
         display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
         justifyContent: 'center',
-        color: '#fff',
-        gap: 16,
+        alignItems: 'center',
       }}
     >
-      <canvas
-        ref={canvasRef}
-        onMouseDown={startDraw}
-        onMouseUp={endDraw}
-        onMouseLeave={endDraw}
-        onMouseMove={draw}
-        onTouchStart={startDraw}
-        onTouchEnd={endDraw}
-        onTouchMove={draw}
-        style={{
-          maxWidth: '90%',
-          borderRadius: 16,
-          touchAction: 'none',
-        }}
-      />
+      <div style={{ position: 'relative' }}>
+        <canvas ref={imgCanvasRef} style={{ borderRadius: 16 }} />
 
-      {!done && <p>Digosok {progress}%</p>}
-      {done && <p>🎉 Kebuka semua!</p>}
+        {!done && (
+          <canvas
+            ref={maskCanvasRef}
+            onMouseDown={() => (isDrawing.current = true)}
+            onMouseUp={() => (isDrawing.current = false)}
+            onMouseLeave={() => (isDrawing.current = false)}
+            onMouseMove={draw}
+            onTouchStart={() => (isDrawing.current = true)}
+            onTouchEnd={() => (isDrawing.current = false)}
+            onTouchMove={draw}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: 16,
+              touchAction: 'none',
+            }}
+          />
+        )}
+
+        {!done && (
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 12,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'rgba(0,0,0,0.6)',
+              color: '#fff',
+              padding: '6px 14px',
+              borderRadius: 999,
+              fontSize: 14,
+            }}
+          >
+            {progress}%
+          </div>
+        )}
+      </div>
     </main>
   )
 }
