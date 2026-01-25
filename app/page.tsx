@@ -6,7 +6,7 @@ export default function Home() {
   const router = useRouter()
 
   const handleClick = async () => {
-    const { default: confetti } = await import("canvas-confetti")
+    const { default: confetti } = await import('canvas-confetti')
 
     confetti({
       particleCount: 120,
@@ -19,7 +19,7 @@ export default function Home() {
       router.push('/next')
     }, 700)
   }
-  
+
   return (
     <main
       style={{
@@ -27,8 +27,7 @@ export default function Home() {
         minHeight: '100vh',
         padding: '120px 32px',
         color: '#f2f2f2',
-        fontFamily:
-          "'Playfair Display', 'Georgia', serif",
+        fontFamily: "'Playfair Display', 'Georgia', serif",
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -72,33 +71,35 @@ export default function Home() {
       />
 
       {/* BUTTON */}
-        <Link
-    href="/next"
-    style={{
-      padding: '16px 36px',
-      borderRadius: 999,
-      border: '1px solid #7b1e24',
-      background: 'transparent',
-      color: '#7b1e24',
-      fontSize: 16,
-      letterSpacing: 0.5,
-      cursor: 'pointer',
-      transition: 'all 0.25s ease',
-      textDecoration: 'none',
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.backgroundColor = '#7b1e24'
-      e.currentTarget.style.color = '#fff'
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.backgroundColor = 'transparent'
-      e.currentTarget.style.color = '#7b1e24'
-    }}
-  >
-    Klik kalo kamu ngerasa keren
-  </Link>
-
-
+      <Link
+        href="/next"
+        onClick={(e) => {
+          e.preventDefault()   // ⬅️ INI KUNCI UTAMANYA
+          handleClick()
+        }}
+        style={{
+          padding: '16px 36px',
+          borderRadius: 999,
+          border: '1px solid #7b1e24',
+          background: 'transparent',
+          color: '#7b1e24',
+          fontSize: 16,
+          letterSpacing: 0.5,
+          cursor: 'pointer',
+          transition: 'all 0.25s ease',
+          textDecoration: 'none',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#7b1e24'
+          e.currentTarget.style.color = '#fff'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent'
+          e.currentTarget.style.color = '#7b1e24'
+        }}
+      >
+        Klik kalo kamu ngerasa keren
+      </Link>
 
       {/* FOOTER NOTE */}
       <p
