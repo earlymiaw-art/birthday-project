@@ -32,10 +32,10 @@ export default function ScratchPage() {
       maskCanvas.width = w
       maskCanvas.height = h
 
-      // 🔥 GAMBAR ASLI (BERWARNA, TAPI KETUTUP)
+      // 🔥 GAMBAR ASLI (BERWARNA)
       imgCtx.drawImage(img, 0, 0, w, h)
 
-      // 🔥 TUTUP FULL
+      // 🔥 TUTUP ARSIR
       maskCtx.fillStyle = '#111'
       maskCtx.fillRect(0, 0, w, h)
 
@@ -79,6 +79,7 @@ export default function ScratchPage() {
     const imgCtx = imgCanvasRef.current!.getContext('2d')!
     const img = imgCache.current!
 
+    // 🔥 GAMBAR BAWAH JADI HITAM PUTIH
     imgCtx.clearRect(0, 0, imgCanvasRef.current!.width, imgCanvasRef.current!.height)
     imgCtx.filter = 'grayscale(100%)'
     imgCtx.drawImage(img, 0, 0)
@@ -113,6 +114,7 @@ export default function ScratchPage() {
       }}
     >
       <div style={{ position: 'relative' }}>
+        {/* 🔥 GAMBAR BAWAH */}
         <canvas ref={imgCanvasRef} style={{ borderRadius: 16 }} />
 
         {!done && (
@@ -152,20 +154,32 @@ export default function ScratchPage() {
           </div>
         )}
 
+        {/* 🔥 CARD DI ATAS GAMBAR */}
         {done && (
           <div
             style={{
               position: 'absolute',
-              bottom: 16,
-              left: 16,
-              width: '70%',
+              inset: 'auto 12px 12px 12px',
               background: '#fff',
-              borderRadius: 16,
-              padding: 16,
+              borderRadius: 18,
+              padding: 12,
+              boxShadow: '0 10px 30px rgba(0,0,0,.4)',
             }}
           >
-            <b>Untuk kamu</b>
-            <p>isi ucapan bebas dari kamu</p>
+            <img
+              src="/img/photo.jpg"
+              style={{
+                width: '100%',
+                borderRadius: 12,
+                marginBottom: 8,
+              }}
+            />
+
+            <b>Dari aku</b>
+            <p style={{ margin: '4px 0' }}>
+              ini isi tulisan bebas yang kamu mau
+            </p>
+            <small>ucapan lanjutan di bawahnya</small>
           </div>
         )}
       </div>
