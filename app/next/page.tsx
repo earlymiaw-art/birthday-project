@@ -9,6 +9,8 @@ export default function ScratchPage() {
   const [progress, setProgress] = useState(0)
   const [done, setDone] = useState(false)
 
+  const imgSrc = '/img/photo.jpg'
+
   useEffect(() => {
     const imgCanvas = imgCanvasRef.current!
     const maskCanvas = maskCanvasRef.current!
@@ -17,7 +19,7 @@ export default function ScratchPage() {
     const maskCtx = maskCanvas.getContext('2d')!
 
     const img = new Image()
-    img.src = '/img/photo.jpg'
+    img.src = imgSrc
 
     img.onload = () => {
       const w = img.width
@@ -28,16 +30,10 @@ export default function ScratchPage() {
       maskCanvas.width = w
       maskCanvas.height = h
 
-      // 🔥 GAMBAR HITAM PUTIH (BASE)
-      imgCtx.filter = 'grayscale(100%)'
+      // 🔥 GAMBAR AWAL BERWARNA
       imgCtx.drawImage(img, 0, 0, w, h)
-      imgCtx.filter = 'none'
 
-      // 🔥 OVERLAY WARNA (YANG DIGOSOK)
-      maskCtx.drawImage(img, 0, 0, w, h)
-
-      // 🔥 TUTUPIN PAKE ARSIR
-      maskCtx.globalCompositeOperation = 'source-over'
+      // 🔥 OVERLAY ARSIR
       maskCtx.fillStyle = '#0b0b0b'
       maskCtx.fillRect(0, 0, w, h)
 
@@ -48,33 +44,31 @@ export default function ScratchPage() {
     }
   }, [])
 
-  const getPos = (e: any) => {
-    const rect = maskCanvasRef.current!.getBoundingClientRect()
-    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left
-    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top
-    return { x, y }
-  }
-
   const calculateProgress = () => {
     const canvas = maskCanvasRef.current!
     const ctx = canvas.getContext('2d')!
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data
 
     let transparent = 0
-    for (let i = 3; i < imageData.length; i += 4) {
-      if (imageData[i] === 0) transparent++
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] === 0) transparent++
     }
 
-    const percent = Math.min(
-      100,
-      Math.round((transparent / (imageData.length / 4)) * 100)
-    )
-
+    const percent = Math.round((transparent / (data.length / 4)) * 100)
     setProgress(percent)
 
     if (percent >= 100) {
       setDone(true)
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      // 🔥 JADI HITAM PUTIH
+      const img = new Image()
+      img.src = imgSrc
+      img.onload = () => {
+        const ctxImg = imgCanvasRef.current!.getContext('2d')!
+        ctxImg.filter = 'grayscale(100%)'
+        ctxImg.drawImage(img, 0, 0)
+        ctxImg.filter = 'none'
+      }
     }
   }
 
@@ -83,27 +77,22 @@ export default function ScratchPage() {
     e.preventDefault()
 
     const ctx = maskCanvasRef.current!.getContext('2d')!
-    const { x, y } = getPos(e)
+    const rect = maskCanvasRef.current!.getBoundingClientRect()
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top
 
     ctx.globalCompositeOperation = 'destination-out'
     ctx.beginPath()
-    ctx.arc(x, y, 35, 0, Math.PI * 2)
+    ctx.arc(x, y, 32, 0, Math.PI * 2)
     ctx.fill()
 
     calculateProgress()
   }
 
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        background: '#000',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
-      <div style={{ position: 'relative' }}>
+    <main style={{ background: '#000', minHeight: '100vh', padding: 24 }}>
+      {/* CANVAS */}
+      <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
         <canvas ref={imgCanvasRef} style={{ borderRadius: 16 }} />
 
         {!done && (
@@ -111,7 +100,6 @@ export default function ScratchPage() {
             ref={maskCanvasRef}
             onMouseDown={() => (isDrawing.current = true)}
             onMouseUp={() => (isDrawing.current = false)}
-            onMouseLeave={() => (isDrawing.current = false)}
             onMouseMove={draw}
             onTouchStart={() => (isDrawing.current = true)}
             onTouchEnd={() => (isDrawing.current = false)}
@@ -124,25 +112,25 @@ export default function ScratchPage() {
             }}
           />
         )}
-
-        {!done && (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 12,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              background: 'rgba(0,0,0,0.6)',
-              color: '#fff',
-              padding: '6px 14px',
-              borderRadius: 999,
-              fontSize: 14,
-            }}
-          >
-            {progress}%
-          </div>
-        )}
       </div>
+
+      {/* CARD SETELAH SELESAI */}
+      {done && (
+        <div style={{ marginTop: 40, textAlign: 'center' }}>
+          <img
+            src={imgSrc}
+            style={{ width: '100%', maxWidth: 360, borderRadius: 16 }}
+          />
+
+          <h3 style={{ marginTop: 16 }}>Dari aku</h3>
+          <p>meong</p>
+
+          <p style={{ marginTop: 16 }}>
+            Ini nanti kamu bebas nulis ucapan panjang,
+            mau lebay, mau manis, mau nangis juga bisa.
+          </p>
+        </div>
+      )}
     </main>
   )
 }
