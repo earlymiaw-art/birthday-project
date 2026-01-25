@@ -1,25 +1,25 @@
 'use client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import confetti from 'canvas-confetti'
-
 
 export default function Home() {
   const router = useRouter()
 
-const handleClick = () => {
-  confetti({
-    particleCount: 120,
-    spread: 70,
-    origin: { y: 0.6 },
-    colors: ['#7b1e24', '#5a1419'],
-  })
+  const handleClick = async () => {
+    const { default: confetti } = await import("canvas-confetti")
 
-  setTimeout(() => {
-    router.push('/next')
-  }, 700) // delay biar efeknya KE RASA
-}
+    confetti({
+      particleCount: 120,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#7b1e24', '#5a1419'],
+    })
 
+    setTimeout(() => {
+      router.push('/next')
+    }, 700)
+  }
+  
   return (
     <main
       style={{
