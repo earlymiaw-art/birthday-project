@@ -177,11 +177,36 @@ export default function ScratchPage() {
       }}
     />
 
-    <b>Dari aku</b>
-    <p style={{ margin: '4px 0' }}>
-      ini isi tulisan bebas yang kamu mau
-    </p>
-    <small>ucapan lanjutan di bawahnya</small>
+    <div>
+  <p
+    style={{
+      margin: '4px 0',
+      fontWeight: 'bold',
+      color: '#000',
+    }}
+  >
+    Dari Bocah Roblok:b
+  </p>
+
+  <p
+    style={{
+      margin: '4px 0',
+      color: '#000',
+      fontWeight: 'normal',
+    }}
+  >
+    HBD YA, JGN LUPA LOGIN ROBLOK.
+  </p>
+
+  <small
+    style={{
+      color: '#000',
+    }}
+  >
+    mwah
+  </small>
+</div>
+
   </div>
 )}
       </div>
