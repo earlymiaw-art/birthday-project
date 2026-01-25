@@ -156,32 +156,34 @@ export default function ScratchPage() {
 
         {/* 🔥 CARD DI ATAS GAMBAR */}
         {done && (
-          <div
-            style={{
-              position: 'absolute',
-              inset: 'auto 12px 12px 12px',
-              background: '#fff',
-              borderRadius: 18,
-              padding: 12,
-              boxShadow: '0 10px 30px rgba(0,0,0,.4)',
-            }}
-          >
-            <img
-              src="/img/photo.jpg"
-              style={{
-                width: '100%',
-                borderRadius: 12,
-                marginBottom: 8,
-              }}
-            />
+  <div
+    style={{
+      position: 'absolute',
+      bottom: -40, // 🔥 INI KUNCINYA
+      left: 12,
+      right: 12,
+      background: '#fff',
+      borderRadius: 18,
+      padding: 12,
+      boxShadow: '0 10px 30px rgba(0,0,0,.4)',
+    }}
+  >
+    <img
+      src="/img/photo.jpg"
+      style={{
+        width: '100%',
+        borderRadius: 12,
+        marginBottom: 8,
+      }}
+    />
 
-            <b>Dari aku</b>
-            <p style={{ margin: '4px 0' }}>
-              ini isi tulisan bebas yang kamu mau
-            </p>
-            <small>ucapan lanjutan di bawahnya</small>
-          </div>
-        )}
+    <b>Dari aku</b>
+    <p style={{ margin: '4px 0' }}>
+      ini isi tulisan bebas yang kamu mau
+    </p>
+    <small>ucapan lanjutan di bawahnya</small>
+  </div>
+)}
       </div>
     </main>
   )
