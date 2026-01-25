@@ -13,7 +13,7 @@ export default function ScratchPage() {
     if (!ctx) return
 
     const img = new Image()
-    img.src = '/img/photo.jpg' // ← PASTIIN FILE INI ADA
+    img.src = '/img/photo.jpg'
 
     img.onload = () => {
       const maxWidth = window.innerWidth * 0.9
@@ -22,17 +22,17 @@ export default function ScratchPage() {
       canvas.width = img.width * scale
       canvas.height = img.height * scale
 
-      // 1️⃣ gambar asli
+      // gambar asli
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
 
-      // 2️⃣ tutup pakai arsir
+      // tutup overlay
       ctx.globalCompositeOperation = 'source-over'
       ctx.fillStyle = '#0b0b0b'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // 3️⃣ teks petunjuk
-      ctx.font = '24px serif'
+      // teks
       ctx.fillStyle = '#7b1e24'
+      ctx.font = '24px serif'
       ctx.textAlign = 'center'
       ctx.fillText(
         'Gosok biar keliatan',
@@ -45,9 +45,7 @@ export default function ScratchPage() {
   const getPos = (
     e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
   ) => {
-    const canvas = canvasRef.current
-    if (!canvas) return { x: 0, y: 0 }
-
+    const canvas = canvasRef.current!
     const rect = canvas.getBoundingClientRect()
 
     if ('touches' in e) {
@@ -83,14 +81,15 @@ export default function ScratchPage() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    // 🔥 INI KUNCI UTAMA (WAJIB DI SINI)
-    ctx.globalCompositeOperation = 'destination-out'
-
     const { x, y } = getPos(e)
 
+    // 🔥 FIX ASLI: erase paksa
+    ctx.save()
+    ctx.globalCompositeOperation = 'destination-out'
     ctx.beginPath()
-    ctx.arc(x, y, 30, 0, Math.PI * 2)
+    ctx.arc(x, y, 32, 0, Math.PI * 2)
     ctx.fill()
+    ctx.restore()
   }
 
   return (
