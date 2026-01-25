@@ -2,15 +2,18 @@
 import { useEffect, useRef } from 'react'
 
 export default function ScratchPage() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const imgCanvasRef = useRef<HTMLCanvasElement | null>(null)
+  const maskCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const isDrawing = useRef(false)
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+    const imgCanvas = imgCanvasRef.current
+    const maskCanvas = maskCanvasRef.current
+    if (!imgCanvas || !maskCanvas) return
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    const imgCtx = imgCanvas.getContext('2d')
+    const maskCtx = maskCanvas.getContext('2d')
+    if (!imgCtx || !maskCtx) return
 
     const img = new Image()
     img.src = '/img/photo.jpg'
@@ -19,33 +22,32 @@ export default function ScratchPage() {
       const maxWidth = window.innerWidth * 0.9
       const scale = img.width > maxWidth ? maxWidth / img.width : 1
 
-      canvas.width = img.width * scale
-      canvas.height = img.height * scale
+      const w = img.width * scale
+      const h = img.height * scale
 
-      // gambar asli
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      imgCanvas.width = w
+      imgCanvas.height = h
+      maskCanvas.width = w
+      maskCanvas.height = h
 
-      // tutup overlay
-      ctx.globalCompositeOperation = 'source-over'
-      ctx.fillStyle = '#0b0b0b'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      // gambar asli (bawah)
+      imgCtx.drawImage(img, 0, 0, w, h)
 
-      // teks
-      ctx.fillStyle = '#7b1e24'
-      ctx.font = '24px serif'
-      ctx.textAlign = 'center'
-      ctx.fillText(
-        'Gosok biar keliatan',
-        canvas.width / 2,
-        canvas.height / 2
-      )
+      // arsir (atas)
+      maskCtx.fillStyle = '#0b0b0b'
+      maskCtx.fillRect(0, 0, w, h)
+
+      maskCtx.fillStyle = '#7b1e24'
+      maskCtx.font = '24px serif'
+      maskCtx.textAlign = 'center'
+      maskCtx.fillText('Gosok biar keliatan', w / 2, h / 2)
     }
   }, [])
 
   const getPos = (
     e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
   ) => {
-    const canvas = canvasRef.current!
+    const canvas = maskCanvasRef.current!
     const rect = canvas.getBoundingClientRect()
 
     if ('touches' in e) {
@@ -75,7 +77,7 @@ export default function ScratchPage() {
     if (!isDrawing.current) return
     e.preventDefault()
 
-    const canvas = canvasRef.current
+    const canvas = maskCanvasRef.current
     if (!canvas) return
 
     const ctx = canvas.getContext('2d')
@@ -83,13 +85,11 @@ export default function ScratchPage() {
 
     const { x, y } = getPos(e)
 
-    // 🔥 FIX ASLI: erase paksa
-    ctx.save()
+    // 🔥 INI YANG PASTI KEBUKA
     ctx.globalCompositeOperation = 'destination-out'
     ctx.beginPath()
-    ctx.arc(x, y, 32, 0, Math.PI * 2)
+    ctx.arc(x, y, 35, 0, Math.PI * 2)
     ctx.fill()
-    ctx.restore()
   }
 
   return (
@@ -102,22 +102,32 @@ export default function ScratchPage() {
         justifyContent: 'center',
       }}
     >
-      <canvas
-        ref={canvasRef}
-        onMouseDown={startDraw}
-        onMouseUp={endDraw}
-        onMouseLeave={endDraw}
-        onMouseMove={draw}
-        onTouchStart={startDraw}
-        onTouchEnd={endDraw}
-        onTouchMove={draw}
-        style={{
-          maxWidth: '90%',
-          borderRadius: 16,
-          touchAction: 'none',
-          cursor: 'pointer',
-        }}
-      />
+      <div style={{ position: 'relative' }}>
+        {/* GAMBAR */}
+        <canvas
+          ref={imgCanvasRef}
+          style={{ borderRadius: 16 }}
+        />
+
+        {/* ARSIR (DIGOSOK) */}
+        <canvas
+          ref={maskCanvasRef}
+          onMouseDown={startDraw}
+          onMouseUp={endDraw}
+          onMouseLeave={endDraw}
+          onMouseMove={draw}
+          onTouchStart={startDraw}
+          onTouchEnd={endDraw}
+          onTouchMove={draw}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: 16,
+            touchAction: 'none',
+            cursor: 'pointer',
+          }}
+        />
+      </div>
     </main>
   )
 }
