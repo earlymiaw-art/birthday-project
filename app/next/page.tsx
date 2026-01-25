@@ -120,68 +120,82 @@ export default function ScratchPage() {
       }}
     >
       <div style={{ position: 'relative' }}>
-        {/* GAMBAR WARNA */}
-        <canvas ref={colorRef} />
+  {/* GAMBAR WARNA (DI BAWAH, KEKETUTUP COVER) */}
+  <canvas
+    ref={colorRef}
+    style={{
+      position: 'absolute',
+      inset: 0,
+      zIndex: 1,
+    }}
+  />
 
-        {/* GAMBAR BW (TIMPA SETELAH 100%) */}
-        {done && (
-          <canvas
-            ref={bwRef}
-            style={{ position: 'absolute', inset: 0 }}
-          />
-        )}
+  {/* GAMBAR BW (TIMPA SETELAH DONE) */}
+  {done && (
+    <canvas
+      ref={bwRef}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        zIndex: 3,
+      }}
+    />
+  )}
 
-        {/* COVER */}
-        {!done && (
-          <canvas
-            ref={coverRef}
-            onMouseDown={() => (isDrawing.current = true)}
-            onMouseUp={() => (isDrawing.current = false)}
-            onMouseLeave={() => (isDrawing.current = false)}
-            onMouseMove={draw}
-            onTouchStart={() => (isDrawing.current = true)}
-            onTouchEnd={() => (isDrawing.current = false)}
-            onTouchMove={draw}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              touchAction: 'none',
-            }}
-          />
-        )}
+  {/* COVER / BATU (PALING ATAS SAAT GOSOK) */}
+  {!done && (
+    <canvas
+      ref={coverRef}
+      onMouseDown={() => (isDrawing.current = true)}
+      onMouseUp={() => (isDrawing.current = false)}
+      onMouseLeave={() => (isDrawing.current = false)}
+      onMouseMove={draw}
+      onTouchStart={() => (isDrawing.current = true)}
+      onTouchEnd={() => (isDrawing.current = false)}
+      onTouchMove={draw}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        zIndex: 2,
+        touchAction: 'none',
+      }}
+    />
+  )}
 
-        {/* CARD (TIDAK NUTUP SEMUA) */}
-        {done && (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 12,
-              left: 12,
-              right: 12,
-              background: '#fff',
-              padding: 16,
-              borderRadius: 12,
-            }}
-          >
-            <b>Pesan dari aku</b>
-            <p>Isi ucapan bebas</p>
-          </div>
-        )}
+  {/* CARD */}
+  {done && (
+    <div
+      style={{
+        position: 'absolute',
+        bottom: 12,
+        left: 12,
+        right: 12,
+        background: '#fff',
+        padding: 16,
+        borderRadius: 12,
+        zIndex: 4,
+      }}
+    >
+      <b>Pesan dari aku</b>
+      <p>Isi ucapan bebas</p>
+    </div>
+  )}
 
-        {!done && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 12,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              color: '#fff',
-            }}
-          >
-            {progress}%
-          </div>
-        )}
-      </div>
+  {!done && (
+    <div
+      style={{
+        position: 'absolute',
+        top: 12,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        color: '#fff',
+        zIndex: 5,
+      }}
+    >
+      {progress}%
+    </div>
+  )}
+</div>
     </main>
   )
 }
