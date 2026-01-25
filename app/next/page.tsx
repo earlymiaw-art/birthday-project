@@ -13,7 +13,7 @@ export default function ScratchPage() {
     if (!ctx) return
 
     const img = new Image()
-    img.src = 'https://i.pinimg.com/736x/c1/c9/3e/c1c93e40ec65041519433d7e79bc4a71.jpg'
+    img.src = '/img/photo.jpg'
 
     img.onload = () => {
       const maxWidth = window.innerWidth * 0.9
@@ -27,14 +27,14 @@ export default function ScratchPage() {
 
       // overlay arsir
       ctx.globalCompositeOperation = 'source-over'
-      ctx.fillStyle = '#0b0b0b'
+      ctx.fillStyle = '#7e7a7a'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
       ctx.font = '24px serif'
       ctx.fillStyle = '#7b1e24'
       ctx.textAlign = 'center'
       ctx.fillText(
-        'Gosok biar keliatan',
+        'Gosok kalo kepo',
         canvas.width / 2,
         canvas.height / 2
       )
