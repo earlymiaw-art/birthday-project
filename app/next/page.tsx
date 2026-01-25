@@ -12,15 +12,19 @@ export default function ScratchPage() {
   const [done, setDone] = useState(false)
 
   useEffect(() => {
-    const color = colorRef.current!
-    const cover = coverRef.current!
-    const bw = bwRef.current!
+    if (!colorRef.current || !coverRef.current || !bwRef.current) return
 
-    const cCtx = color.getContext('2d')!
-    const coverCtx = cover.getContext('2d')!
-    const bwCtx = bw.getContext('2d')!
+    const color = colorRef.current
+    const cover = coverRef.current
+    const bw = bwRef.current
 
-    const img = new Image()
+    const cCtx = color.getContext('2d')
+    const coverCtx = cover.getContext('2d')
+    const bwCtx = bw.getContext('2d')
+
+    if (!cCtx || !coverCtx || !bwCtx) return
+
+    const img = new window.Image()
     img.src = '/img/photo.jpg'
 
     img.onload = () => {
@@ -32,19 +36,22 @@ export default function ScratchPage() {
         c.height = h
       })
 
-      // 🔥 GAMBAR WARNA (HIDDEN DI AWAL)
+      // 🔥 GAMBAR WARNA (DISIAPKAN, TAPI TERTUTUP COVER)
+      cCtx.clearRect(0, 0, w, h)
       cCtx.drawImage(img, 0, 0, w, h)
 
       // 🔥 COVER / BATU
+      coverCtx.globalCompositeOperation = 'source-over'
       coverCtx.fillStyle = '#0b0b0b'
       coverCtx.fillRect(0, 0, w, h)
 
       coverCtx.fillStyle = '#7b1e24'
       coverCtx.font = '24px serif'
       coverCtx.textAlign = 'center'
-      coverCtx.fillText('Gosok', w / 2, h / 2)
+      coverCtx.textBaseline = 'middle'
+      coverCtx.fillText('Gosok sampai habis', w / 2, h / 2)
 
-      // BW kosong dulu
+      // BW KOSONG
       bwCtx.clearRect(0, 0, w, h)
     }
   }, [])
@@ -57,28 +64,31 @@ export default function ScratchPage() {
   }
 
   const calcProgress = () => {
-    const c = coverRef.current!
-    const ctx = c.getContext('2d')!
-    const data = ctx.getImageData(0, 0, c.width, c.height).data
+    const canvas = coverRef.current!
+    const ctx = canvas.getContext('2d')!
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data
 
     let cleared = 0
     for (let i = 3; i < data.length; i += 4) {
       if (data[i] === 0) cleared++
     }
 
-    const p = Math.round((cleared / (data.length / 4)) * 100)
-    setProgress(p)
+    const percent = Math.min(
+      100,
+      Math.round((cleared / (data.length / 4)) * 100)
+    )
 
-    if (p >= 100) finish()
+    setProgress(percent)
+
+    if (percent >= 100) finish()
   }
 
   const finish = () => {
-    const color = colorRef.current!
-    const bw = bwRef.current!
+    if (!colorRef.current || !bwRef.current) return
 
-    const bwCtx = bw.getContext('2d')!
+    const bwCtx = bwRef.current.getContext('2d')!
     bwCtx.filter = 'grayscale(100%)'
-    bwCtx.drawImage(color, 0, 0)
+    bwCtx.drawImage(colorRef.current, 0, 0)
     bwCtx.filter = 'none'
 
     setDone(true)
@@ -110,10 +120,10 @@ export default function ScratchPage() {
       }}
     >
       <div style={{ position: 'relative' }}>
-        {/* WARNA (MUNCUL SAAT DIGOSOK) */}
+        {/* GAMBAR WARNA */}
         <canvas ref={colorRef} />
 
-        {/* BW (MUNCUL SETELAH DONE) */}
+        {/* GAMBAR BW (TIMPA SETELAH 100%) */}
         {done && (
           <canvas
             ref={bwRef}
@@ -127,6 +137,7 @@ export default function ScratchPage() {
             ref={coverRef}
             onMouseDown={() => (isDrawing.current = true)}
             onMouseUp={() => (isDrawing.current = false)}
+            onMouseLeave={() => (isDrawing.current = false)}
             onMouseMove={draw}
             onTouchStart={() => (isDrawing.current = true)}
             onTouchEnd={() => (isDrawing.current = false)}
@@ -139,7 +150,7 @@ export default function ScratchPage() {
           />
         )}
 
-        {/* CARD */}
+        {/* CARD (TIDAK NUTUP SEMUA) */}
         {done && (
           <div
             style={{
