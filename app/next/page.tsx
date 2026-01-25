@@ -13,7 +13,7 @@ export default function ScratchPage() {
     if (!ctx) return
 
     const img = new Image()
-    img.src = '/img/photo.jpg'
+    img.src = '/img/photo.jpg' // ← PASTIIN FILE INI ADA
 
     img.onload = () => {
       const maxWidth = window.innerWidth * 0.9
@@ -22,25 +22,23 @@ export default function ScratchPage() {
       canvas.width = img.width * scale
       canvas.height = img.height * scale
 
-      // gambar asli
+      // 1️⃣ gambar asli
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
 
-      // overlay arsir
+      // 2️⃣ tutup pakai arsir
       ctx.globalCompositeOperation = 'source-over'
-      ctx.fillStyle = '#7e7a7a'
+      ctx.fillStyle = '#0b0b0b'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
+      // 3️⃣ teks petunjuk
       ctx.font = '24px serif'
       ctx.fillStyle = '#7b1e24'
       ctx.textAlign = 'center'
       ctx.fillText(
-        'Gosok kalo kepo',
+        'Gosok biar keliatan',
         canvas.width / 2,
         canvas.height / 2
       )
-
-      // mode hapus
-      ctx.globalCompositeOperation = 'destination-out'
     }
   }, [])
 
@@ -85,10 +83,13 @@ export default function ScratchPage() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
+    // 🔥 INI KUNCI UTAMA (WAJIB DI SINI)
+    ctx.globalCompositeOperation = 'destination-out'
+
     const { x, y } = getPos(e)
 
     ctx.beginPath()
-    ctx.arc(x, y, 28, 0, Math.PI * 2)
+    ctx.arc(x, y, 30, 0, Math.PI * 2)
     ctx.fill()
   }
 
