@@ -36,14 +36,18 @@ export default function ScratchPage() {
       maskCanvas.width = w
       maskCanvas.height = h
 
+      // gambar warna
       imgCtx.drawImage(img, 0, 0, w, h)
 
+      // cover
       maskCtx.fillStyle = '#111'
       maskCtx.fillRect(0, 0, w, h)
 
+      // teks tengah
       maskCtx.fillStyle = '#7b1e24'
       maskCtx.font = '22px serif'
       maskCtx.textAlign = 'center'
+      maskCtx.textBaseline = 'middle'
       maskCtx.fillText('Gosok sampai 100%', w / 2, h / 2)
     }
   }, [slide])
@@ -65,9 +69,12 @@ export default function ScratchPage() {
       if (data[i] === 0) transparent++
     }
 
-    const percent = Math.min(100, Math.round((transparent / (data.length / 4)) * 100))
-    setProgress(percent)
+    const percent = Math.min(
+      100,
+      Math.round((transparent / (data.length / 4)) * 100)
+    )
 
+    setProgress(percent)
     if (percent >= 100 && !done) finish()
   }
 
@@ -137,7 +144,7 @@ export default function ScratchPage() {
             transition: '0.4s ease',
           }}
         >
-          {/* ===== SLIDE 1 (SCRATCH) ===== */}
+          {/* ===== SLIDE 1 ===== */}
           <div style={{ minWidth: '100%', position: 'relative' }}>
             <canvas ref={imgCanvasRef} style={{ width: '100%', borderRadius: 16 }} />
 
@@ -192,7 +199,6 @@ export default function ScratchPage() {
                 }}
               >
                 <img src="/img/photo.jpg" style={{ width: '100%', borderRadius: 12 }} />
-
                 <p style={{ margin: '6px 0', fontWeight: 'bold', color: '#000' }}>
                   Dari aku
                 </p>
@@ -201,6 +207,48 @@ export default function ScratchPage() {
                 </p>
                 <small style={{ color: '#000' }}>ucapan lanjutan di bawahnya</small>
               </div>
+            )}
+
+            {/* PANAH KIRI */}
+            {slide > 0 && (
+              <button
+                onClick={() => setSlide(slide - 1)}
+                style={{
+                  position: 'absolute',
+                  left: -18,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
+                  border: 'none',
+                  background: '#fff',
+                  cursor: 'pointer',
+                }}
+              >
+                ◀
+              </button>
+            )}
+
+            {/* PANAH KANAN */}
+            {slide < 2 && (
+              <button
+                onClick={() => setSlide(slide + 1)}
+                style={{
+                  position: 'absolute',
+                  right: -18,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
+                  border: 'none',
+                  background: '#fff',
+                  cursor: 'pointer',
+                }}
+              >
+                ▶
+              </button>
             )}
           </div>
 
@@ -213,12 +261,6 @@ export default function ScratchPage() {
           <div style={{ minWidth: '100%' }}>
             <img src="/img/photo3.jpg" style={{ width: '100%', borderRadius: 16 }} />
           </div>
-        </div>
-
-        {/* ===== PANAH ===== */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16 }}>
-          <button onClick={() => slide > 0 && setSlide(slide - 1)}>◀</button>
-          <button onClick={() => slide < 2 && setSlide(slide + 1)}>▶</button>
         </div>
       </div>
     </main>
