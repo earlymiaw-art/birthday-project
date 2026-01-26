@@ -11,6 +11,10 @@ export default function ScratchPage() {
 
   const imgCache = useRef<HTMLImageElement | null>(null)
 
+  // 🔥 SLIDE STATE
+  const [slide, setSlide] = useState(0)
+  const startX = useRef<number | null>(null)
+
   useEffect(() => {
     const imgCanvas = imgCanvasRef.current!
     const maskCanvas = maskCanvasRef.current!
@@ -70,9 +74,7 @@ export default function ScratchPage() {
 
     setProgress(percent)
 
-    if (percent >= 100 && !done) {
-      finish()
-    }
+    if (percent >= 100 && !done) finish()
   }
 
   const finish = () => {
@@ -80,7 +82,12 @@ export default function ScratchPage() {
     const img = imgCache.current!
 
     // 🔥 GAMBAR BAWAH JADI HITAM PUTIH
-    imgCtx.clearRect(0, 0, imgCanvasRef.current!.width, imgCanvasRef.current!.height)
+    imgCtx.clearRect(
+      0,
+      0,
+      imgCanvasRef.current!.width,
+      imgCanvasRef.current!.height
+    )
     imgCtx.filter = 'grayscale(100%)'
     imgCtx.drawImage(img, 0, 0)
     imgCtx.filter = 'none'
@@ -103,6 +110,21 @@ export default function ScratchPage() {
     calculateProgress()
   }
 
+  // 🔥 SWIPE SLIDE (HP)
+  const onTouchStart = (e: React.TouchEvent) => {
+    startX.current = e.touches[0].clientX
+  }
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (startX.current === null) return
+    const diff = startX.current - e.changedTouches[0].clientX
+
+    if (diff > 50 && slide < 2) setSlide(slide + 1)
+    if (diff < -50 && slide > 0) setSlide(slide - 1)
+
+    startX.current = null
+  }
+
   return (
     <main
       style={{
@@ -113,102 +135,109 @@ export default function ScratchPage() {
         alignItems: 'center',
       }}
     >
-      <div style={{ position: 'relative' }}>
-        {/* 🔥 GAMBAR BAWAH */}
-        <canvas ref={imgCanvasRef} style={{ borderRadius: 16 }} />
+      {/* 🔥 SLIDER WRAPPER */}
+      <div
+        style={{ width: 320, overflow: 'hidden' }}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        <div
+          style={{
+            display: 'flex',
+            transform: `translateX(-${slide * 100}%)`,
+            transition: 'transform .4s ease',
+          }}
+        >
+          {/* ===== SLIDE 1 (SCRATCH) ===== */}
+          <div style={{ minWidth: '100%', position: 'relative' }}>
+            <canvas ref={imgCanvasRef} style={{ borderRadius: 16 }} />
 
-        {!done && (
-          <canvas
-            ref={maskCanvasRef}
-            onMouseDown={() => (isDrawing.current = true)}
-            onMouseUp={() => (isDrawing.current = false)}
-            onMouseLeave={() => (isDrawing.current = false)}
-            onMouseMove={draw}
-            onTouchStart={() => (isDrawing.current = true)}
-            onTouchEnd={() => (isDrawing.current = false)}
-            onTouchMove={draw}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              borderRadius: 16,
-              touchAction: 'none',
-            }}
-          />
-        )}
+            {!done && (
+              <canvas
+                ref={maskCanvasRef}
+                onMouseDown={() => (isDrawing.current = true)}
+                onMouseUp={() => (isDrawing.current = false)}
+                onMouseLeave={() => (isDrawing.current = false)}
+                onMouseMove={draw}
+                onTouchStart={() => (isDrawing.current = true)}
+                onTouchEnd={() => (isDrawing.current = false)}
+                onTouchMove={draw}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: 16,
+                  touchAction: 'none',
+                }}
+              />
+            )}
 
-        {!done && (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 12,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              background: 'rgba(0,0,0,0.6)',
-              color: '#fff',
-              padding: '6px 14px',
-              borderRadius: 999,
-              fontSize: 14,
-            }}
-          >
-            {progress}%
+            {!done && (
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 12,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'rgba(0,0,0,0.6)',
+                  color: '#fff',
+                  padding: '6px 14px',
+                  borderRadius: 999,
+                  fontSize: 14,
+                }}
+              >
+                {progress}%
+              </div>
+            )}
+
+            {done && (
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: -80,
+                  left: 12,
+                  right: 12,
+                  background: '#fff',
+                  borderRadius: 18,
+                  padding: 12,
+                  boxShadow: '0 10px 30px rgba(0,0,0,.4)',
+                }}
+              >
+                <img
+                  src="/img/photo.jpg"
+                  style={{
+                    width: '100%',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                  }}
+                />
+
+                <p style={{ margin: 4, fontWeight: 'bold', color: '#000' }}>
+                  Dari Bocah Roblok:b
+                </p>
+                <p style={{ margin: 4, color: '#000' }}>
+                  HBD YA, JGN LUPA LOGIN ROBLOK.
+                </p>
+                <small style={{ color: '#000' }}>mwah</small>
+              </div>
+            )}
           </div>
-        )}
 
-        {/* 🔥 CARD DI ATAS GAMBAR */}
-        {done && (
-  <div
-    style={{
-      position: 'absolute',
-      bottom: -80, // 🔥 INI KUNCINYA
-      left: 12,
-      right: 12,
-      background: '#fff',
-      borderRadius: 18,
-      padding: 12,
-      boxShadow: '0 10px 30px rgba(0,0,0,.4)',
-    }}
-  >
-    <img
-      src="/img/photo.jpg"
-      style={{
-        width: '100%',
-        borderRadius: 12,
-        marginBottom: 8,
-      }}
-    />
+          {/* ===== SLIDE 2 ===== */}
+          <div style={{ minWidth: '100%' }}>
+            <img
+              src="/img/photo2.jpg"
+              style={{ width: '100%', borderRadius: 16 }}
+            />
+          </div>
 
-    <div>
-  <p
-    style={{
-      margin: '4px 0',
-      fontWeight: 'bold',
-      color: '#000',
-    }}
-  >
-    Dari Bocah Roblok:b
-  </p>
-
-  <p
-    style={{
-      margin: '4px 0',
-      color: '#000',
-      fontWeight: 'normal',
-    }}
-  >
-    HBD YA, JGN LUPA LOGIN ROBLOK.
-  </p>
-
-  <small
-    style={{
-      color: '#000',
-    }}
-  >
-    mwah
-  </small>
-</div>
-
-  </div>
-)}
+          {/* ===== SLIDE 3 ===== */}
+          <div style={{ minWidth: '100%' }}>
+            <img
+              src="/img/photo3.jpg"
+              style={{ width: '100%', borderRadius: 16 }}
+            />
+          </div>
+        </div>
       </div>
     </main>
   )
